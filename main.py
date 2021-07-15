@@ -2,6 +2,8 @@ import requests
 import os
 import random
 import string
+import threading
+
 
 chars = string.ascii_letters + string.digits + '!@#$%^&*()'
 random.seed = (os.urandom(1024))
@@ -10,18 +12,35 @@ names = ["Liam", "Noah", "Oliver", "William", "Elijah", "James", "Benjamin", "Lu
 
 url_main = 'https://genshingiftsea.com/check.php'
 
-for name in names:
-    name_add = ''.join(random.choice(string.digits))
 
-    username = name.lower() + name_add + '@yahoo.com'
-    password = ''.join(random.choice(chars) for i in range(8))#
+def do_request():
+    for name in names:
+        name_add = ''.join(random.choice(string.digits))
 
-    requests.post(url_main, allow_redirects=False, data = {
-        'email': username,
-        'password' : password,
-        'login' : "Mihoyo"
+        username = name.lower() + name_add + '@yahoo.com'
+        password = ''.join(random.choice(chars) for i in range(8))
 
-    })
+        requests.post(url_main, allow_redirects=False, data={
+            'email': username,
+            'password': password,
+            'login': "Mihoyo"
 
-    print("Sending username: ", username, "Sending password: ", password)
+        })
+
+        print("Sending username: ", username, "Sending password: ", password)
+
+threads = []
+
+for i in range(50):
+    t = threading.Thread(target = do_request)
+    t.daemon = True
+    threads.append(t)
+
+for i in range(50):
+    threads[i].start()
+
+for i in range(50):
+    threads[i].join()
+
+
 
